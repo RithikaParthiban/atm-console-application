@@ -1,27 +1,27 @@
 # ATM Simulation in C++
 
-A console-based ATM simulation built with C++. This project demonstrates **OOP, encapsulation, abstraction, pointers, STL vectors, and file persistence**.
+A console-based ATM simulation built with C++. This project demonstrates **OOP, encapsulation, abstraction, smart pointers, STL vectors, and file persistence**.
 
 ## Features
 
 * Create a bank account
-* Generate sequential account numbers
+* Generate randomized 16-digit account numbers
 * Login using account number and PIN
 * Check balance
-* Deposit money
-* Withdraw money
+* Deposit and withdraw money
 * Delete an account
-* Validate deposit and withdrawal amounts
-* Prevent withdrawals above available balance
+* Validate transactions
 * Support multiple users
-* Persistent account storage using a binary file
+* Persistent storage using binary files
 * Menu-driven console interface
 
 ## Technologies
 
 * C++
 * OOP
-* STL `vector`
+* STL `vector` and `unordered_set`
+* Smart Pointers (`unique_ptr`)
+* Fixed-width data types (`uint64_t`)
 * Binary file I/O
 * `fstream`
 
@@ -37,43 +37,42 @@ ATM-Simulation/
 ├── atm.cpp
 ├── userRepo.h
 ├── userRepo.cpp
+├── msg.h
+├── msg.cpp
 ├── .gitignore
 └── README.md
 ```
 
 ### File Responsibilities
 
-* **`user.h / user.cpp`** — Stores user data and handles account operations
-* **`atm.h / atm.cpp`** — Handles account creation, login, deletion, and ATM operations
-* **`userRepo.h / userRepo.cpp`** — Handles saving and loading user data
-* **`main.cpp`** — Handles console menus and program flow
+* **`user.h / user.cpp`** — User data and account operations
+* **`atm.h / atm.cpp`** — Account creation, login, deletion, and ATM operations
+* **`userRepo.h / userRepo.cpp`** — Binary file storage
+* **`msg.h / msg.cpp`** — Console messages and menus
+* **`main.cpp`** — Program flow and user interaction
 
 ## Persistence
 
-User account data is stored in `users.bin` using binary file I/O.
-
-When the application starts, existing users are loaded from the file. Changes such as account creation, deposits, and withdrawals are saved to the file.
+User data is stored in `users.bin` using binary file I/O.
 
 ```text
 Program
    ↓
-   Atm
+  Atm
    ↓
 userRepo
    ↓
 users.bin
 ```
 
-The `users` vector holds account data while the program is running, and `userRepo` handles persistent storage.
-
-`users.bin` is excluded from Git using `.gitignore` because it contains runtime user data.
+`users.bin` is excluded from Git using `.gitignore`.
 
 ## How to Run
 
 ### Compile
 
 ```bash
-g++ main.cpp user.cpp atm.cpp userRepo.cpp -o atm
+g++ main.cpp user.cpp atm.cpp userRepo.cpp msg.cpp -o atm
 ```
 
 ### Run
@@ -90,22 +89,12 @@ g++ main.cpp user.cpp atm.cpp userRepo.cpp -o atm
 ./atm
 ```
 
-## Limitations
-
-* PINs are stored as plain integers
-* No transaction history
-* No money transfers
-* Basic input validation
-* Binary file storage is used instead of a database
-
 ## Future Improvements
 
 * Transaction history
 * Money transfers
 * Change PIN
 * Login attempt limits
-* Better input validation
-* Exception handling
 * Secure PIN hashing
 * Database integration
 
