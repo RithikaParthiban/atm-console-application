@@ -1,21 +1,31 @@
 #pragma once
 
 #include <vector>
+#include <memory>
+#include <cstdint>
+#include <unordered_set>
+#include <random>
 #include "user.h"
 #include "userRepo.h"
 
 class Atm {
-    private:
-        std::vector<User> users;
-        userRepo repo;
-        int nextAccountNumber = 1000;
+private:
+    std::vector<std::unique_ptr<User>> users;
+    userRepo repo;
 
-    public:
-        Atm();
-        ~Atm();
+    std::unordered_set<uint64_t> generatedAccNums;
 
-        int createAccount();
-        User* login(int accNum, int pin);
-        void save();
-        bool deleteAccount(int accNum,int pin);
+    uint64_t generateAccNum();
+
+public:
+    Atm();
+    ~Atm();
+
+    uint64_t createAccount();
+
+    User* login(uint64_t accNum, const char* pin);
+
+    void save();
+
+    bool deleteAccount(uint64_t accNum, const char* pin);
 };

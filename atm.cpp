@@ -1,50 +1,74 @@
 #include "atm.h"
 #include <iostream>
+#include <cstring>
 
 Atm::Atm() : repo("users.bin"){
-    users=repo.load();
+    users = repo.load();
 
-    for(size_t i=0;i<users.size();i++){
-        if(users[i].getAccountNumber() >= nextAccountNumber){
-            nextAccountNumber = users[i].getAccountNumber() + 1;
-        }
+    for (const auto& user : users) {
+        generatedAccNums.insert(
+            user->getAccountNumber()
+        );
     }
 }
 
-int Atm::createAccount(){
-    std::string name;
-    int pin;
+uint64_t Atm::generateAccNum(){
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dis(
+        1000000000000000ULL,
+        9999999999999999ULL
+    );
 
-    std::cout<<"Enter your name: "<<std::endl;
-    std::cin>>name;
+    uint64_t accNum;
 
-    std::cout<<"Enter your PIN: "<<std::endl;
-    std::cin>>pin;
+    do {
+        accNum = dis(gen);
+    }
+    while (generatedAccNums.find(accNum) != generatedAccNums.end());
+    generatedAccNums.insert(accNum);
+    return accNum;
+}
 
-    int accNum=nextAccountNumber++;
-    User newUser(accNum,name,pin,0.0);
-    users.push_back(newUser);
+uint64_t Atm::createAccount(){
+    char name[100];
+    char pin[20];
+
+    std::cout << "Enter your name: ";
+    std::cin >> name;
+
+    std::cout << "Enter your PIN: ";
+    std::cin >> pin;
+
+    uint64_t accNum = generateAccNum();
+
+    users.push_back(
+        std::make_unique<User>(accNum,name,pin,0)
+    );
+
     repo.save(users);
     return accNum;
 }
 
-User* Atm::login(int accNum,int pin){
-    for(size_t i=0;i<users.size();i++){
-        if(users[i].getAccountNumber()==accNum && users[i].getPin()==pin){
-            return &users[i];
+User* Atm::login(uint64_t accNum, const char* pin)
+{
+    for (auto& user : users) {
+        if (user->getAccountNumber() == accNum &&
+            std::strcmp(user->getPin(), pin) == 0) {
+            return user.get();
         }
     }
     return nullptr;
 }
 
-void Atm::save() {
-    repo.save(users);
-}
+void Atm::save() { repo.save(users); }
 
-bool Atm::deleteAccount(int accNum,int pin){
-    for(size_t i=0;i<users.size();i++){
-        if(users[i].getAccountNumber()==accNum && users[i].getPin()==pin){
-            users.erase(users.begin()+i);
+bool Atm::deleteAccount(uint64_t accNum, const char* pin) {
+    for (auto i = users.begin(); i != users.end(); ++i) {
+        if ((*i)->getAccountNumber() == accNum &&
+            std::strcmp((*i)->getPin(), pin) == 0) {
+            users.erase(i);
+            generatedAccNums.erase(accNum);
             repo.save(users);
             return true;
         }
